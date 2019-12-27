@@ -3,6 +3,8 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/FPN_Pytorch" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/fpn" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/frcnn" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/pytorch-faster-rcnn" vcs="Git" />
   </component>
 </project>

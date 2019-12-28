@@ -1,6 +1,6 @@
 tracktor:
   name: Oracle-Kill
-  # seed: 12345
+
   tracker:
     # Do camera motion compensation
     do_align: False

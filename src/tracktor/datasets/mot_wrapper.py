@@ -17,6 +17,8 @@ class MOT17_Wrapper(Dataset):
 		train_sequences = ['MOT17-02', 'MOT17-04', 'MOT17-05', 'MOT17-09', 'MOT17-10', 'MOT17-11', 'MOT17-13']
 		test_sequences = ['MOT17-01', 'MOT17-03', 'MOT17-06', 'MOT17-07', 'MOT17-08', 'MOT17-12', 'MOT17-14']
 
+
+
 		if "train" == split:
 			sequences = train_sequences
 		elif "test" == split:
@@ -25,6 +27,9 @@ class MOT17_Wrapper(Dataset):
 			sequences = train_sequences + test_sequences
 		elif f"MOT17-{split}" in train_sequences + test_sequences:
 			sequences = [f"MOT17-{split}"]
+		# elif "train_mask" == split:
+			# sequences_mask = train_mask_sequences
+			# sequences = train_det_4_mask_sequences
 		else:
 			raise NotImplementedError("MOT split not available.")
 
@@ -34,9 +39,54 @@ class MOT17_Wrapper(Dataset):
 				self._data.append(MOT17_Sequence(seq_name=s, dets='DPM17', **dataloader))
 				self._data.append(MOT17_Sequence(seq_name=s, dets='FRCNN17', **dataloader))
 				self._data.append(MOT17_Sequence(seq_name=s, dets='SDP17', **dataloader))
+			# elif dets == 'mots17':
+			# 	self._data.append(MOT17_Sequence(seq_name=s, dets='FRCNN17', **dataloader))
 			else:
 				self._data.append(MOT17_Sequence(seq_name=s, dets=dets, **dataloader))
+		# if sequences_mask:
+		# 	self._data.append(MOT17_Sequence(Seq_name="mots",dets='FRCNN17',**dataloader))
 
+	def __len__(self):
+		return len(self._data)
+
+	def __getitem__(self, idx):
+		return self._data[idx]
+
+
+class MOTS17_Wrapper(MOT17_Wrapper):
+	"""A Wrapper for the MOT_Sequence class to return multiple sequences."""
+
+	def __init__(self, split, dataloader):
+		"""Initliazes all subset of the dataset.
+
+		Keyword arguments:
+		split -- the split of the dataset to use
+		dataloader -- args for the MOT_Sequence dataloader
+		"""
+
+		train_det_4_mask_sequences = ['MOT17-%02d'%idx for idx in [2,5,9,11]]#mots challenge provided the mask anno data.
+		train_mask_sequences =  ["%04d"%idx for idx in [2,5,9,11]]
+		test_sequences = ['MOT17-01', 'MOT17-03', 'MOT17-06', 'MOT17-07', 'MOT17-08', 'MOT17-12', 'MOT17-14']
+
+		if "train" == split:
+			sequences = train_det_4_mask_sequences
+			mask_sequences = train_mask_sequences
+		elif "test" == split:
+			sequences = test_sequences
+		elif "all" == split:
+			sequences = train_det_4_mask_sequences + test_sequences
+			mask_sequences = train_mask_sequences
+		elif f"MOT17-{split}" in test_sequences:# only one
+			sequences = [f"MOT17-{split}"]
+			mask_sequences = ["%04d"%split]
+		else:
+			raise NotImplementedError("MOT19CVPR split not available.")
+
+		self._data = []
+		for s in sequences:
+			self._data.append(MOTS_Sequence(seq_name=s, **dataloader))
+		for s in mask_sequences:
+			self._data.append(MOTS_Sequence(seq_name=s, **dataloader))
 	def __len__(self):
 		return len(self._data)
 

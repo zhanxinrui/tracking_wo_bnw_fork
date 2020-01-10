@@ -79,18 +79,19 @@ class Tracker:
 
 		# regress
 		boxes, scores = self.obj_detect.predict_boxes(blob['img'], pos)
+		# boxes, scores = self.obj_detect.predict_boxes(blob['img'], boxes)
 		pos = clip_boxes_to_image(boxes, blob['img'].shape[-2:])
 
 		s = []
-		for i in range(len(self.tracks) - 1, -1, -1):
-			t = self.tracks[i]
+		for i in range(len(self.tracks) - 1, -1, -1):#tracks逆序处理，不知道目的是什么！
+			t = self.tracks[i]#
 			t.score = scores[i]
-			if scores[i] <= self.regression_person_thresh:
+			if scores[i] <= self.regression_person_thresh:#评分低会丢如inactive
 				self.tracks_to_inactive([t])
 			else:
 				s.append(scores[i])
 				# t.prev_pos = t.pos
-				t.pos = pos[i].view(1, -1)
+				t.pos = pos[i].view(1, -1)#t添加pos!!!
 
 		return torch.Tensor(s[::-1]).cuda()
 
@@ -130,7 +131,7 @@ class Tracker:
 		
 		if self.do_reid:
 			new_det_features = self.reid_network.test_rois(
-				blob['img'], new_det_pos).data
+				blob['img'], new_det_pos).data#获取roi的feature
 
 			if len(self.inactive_tracks) >= 1:
 				# calculate appearance distances
@@ -313,7 +314,7 @@ class Tracker:
 				if keep.nelement() > 0:
 					if self.do_reid:
 						new_features = self.get_appearances(blob)
-						self.add_features(new_features)
+						self.add_features(new_features)#得到表观特征
 
 		#####################
 		# Create new tracks #
@@ -325,11 +326,11 @@ class Tracker:
 		# !!! In the paper this is done by calculating the overlap with existing tracks, but the
 		# !!! result stays the same.
 		if det_pos.nelement() > 0:
-			keep = nms(det_pos, det_scores, self.detection_nms_thresh)
+			keep = nms(det_pos, det_scores, self.detection_nms_thresh)#重叠的需要去掉score小的det
 			det_pos = det_pos[keep]
 			det_scores = det_scores[keep]
 
-			# check with every track in a single run (problem if tracks delete each other)
+			# check with every track in a single run (problem if tracks delete each other 对det与每一track进行匹配，取nms最大值，并把det移出keep,这样的问题在于假如有更大的重合出现在后面该怎么办。
 			for t in self.tracks:
 				nms_track_pos = torch.cat([t.pos, det_pos])
 				nms_track_scores = torch.cat(
@@ -348,7 +349,7 @@ class Tracker:
 			new_det_scores = det_scores
 
 			# try to reidentify tracks
-			new_det_pos, new_det_scores, new_det_features = self.reid(blob, new_det_pos, new_det_scores)
+			new_det_pos, new_det_scores, new_det_features = self.reid(blob, new_det_pos, new_det_scores)#通过reid生成新的keep
 			
 			# add new
 			if new_det_pos.nelement() > 0:
@@ -367,7 +368,7 @@ class Tracker:
 			t.count_inactive += 1
 
 		self.inactive_tracks = [
-			t for t in self.inactive_tracks if t.has_positive_area() and t.count_inactive <= self.inactive_patience
+			t for t in self.inactive_tracks if t.has_positive_area() and t.count_inactive <= self.inactive_patience#inactive有一定的patient否则就移出Inactive
 		]
 
 		self.im_index += 1

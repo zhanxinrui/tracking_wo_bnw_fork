@@ -1,20 +1,27 @@
-
 from .mot_wrapper import MOT17_Wrapper, MOT19CVPR_Wrapper, MOT17LOWFPS_Wrapper
+# from .mot_wrapper import MOT17_Wrapper, MOT19CVPR_Wrapper, MOT17LOWFPS_Wrapper,MOTS17_Wrapper
 from .mot_siamese_wrapper import MOT_Siamese_Wrapper
 from .mot15_wrapper import MOT15_Wrapper
 from .marcuhmot import MarCUHMOT
 
 
+
 _sets = {}
 
 
-# Fill all available datasets, change here to modify / add new datasets.
+# Fill all available datasets, change here to modify / add new datasets.  将dataset的文件名加入到_sets字典中
 for split in ['train', 'test', 'all', '01', '02', '03', '04', '05', '06', '07', '08', '09',
               '10', '11', '12', '13', '14']:
     for dets in ['DPM16', 'DPM_RAW16', 'DPM17', 'FRCNN17', 'SDP17', '17', '']:
         name = f'mot17_{split}_{dets}'
         _sets[name] = (lambda *args, split=split,
                        dets=dets: MOT17_Wrapper(split, dets, *args))
+
+
+for split in ['train','test','02','05','09','11']:
+    #only part of FRCNN detections and mask due to the lack of mask dataset.
+    name = f'mots17_{split}'
+    _sets[name] = (lambda *args, split=split: MOTS17_Wrapper(split,*args))
 
 for split in ['train', 'test', 'all', '01', '02', '03', '04', '05', '06', '07', '08']:
     # only FRCNN detections

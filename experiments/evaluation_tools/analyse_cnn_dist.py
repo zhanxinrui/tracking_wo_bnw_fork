@@ -5,6 +5,9 @@ import os
 import numpy as np
 from sacred import Experiment
 import torch
+import torchvision.models.detection
+
+
 from torch.autograd import Variable
 import torch.nn.functional as F
 import cv2

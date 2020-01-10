@@ -15,6 +15,7 @@ from tqdm import tqdm
 import sacred
 from sacred import Experiment
 from tracktor.frcnn_fpn import FRCNN_FPN
+from tracktor.mrcnn_fpn import MRCNN_FPN
 from tracktor.config import get_output_dir
 from tracktor.datasets.factory import Datasets
 from tracktor.oracle_tracker import OracleTracker
@@ -56,10 +57,11 @@ def main(tracktor, reid, _config, _log, _run):
     # object detection
     _log.info("Initializing object detector.")
 
-    obj_detect = FRCNN_FPN(num_classes=2)
+    obj_detect = MRCNN_FPN(num_classes=2)
+    # obj_detect = FRCNN_FPN(num_classes=2)
     obj_detect.load_state_dict(torch.load(_config['tracktor']['obj_detect_model'],
                                map_location=lambda storage, loc: storage))
-
+    # print(obj_detect.roi_heads.box_predictor)
     obj_detect.eval()
     obj_detect.cuda()
 

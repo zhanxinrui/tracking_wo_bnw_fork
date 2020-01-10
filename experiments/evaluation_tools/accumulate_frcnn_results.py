@@ -1,8 +1,6 @@
 import os
 import csv
 import numpy as np
-
-
 if __name__ == "__main__":
     results_dir = 'output/tracktor/MOT17'
 

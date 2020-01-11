@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 
-from .mot_sequence import MOT17_Sequence, MOT19CVPR_Sequence, MOT17LOWFPS_Sequence
+from .mot_sequence import MOT17_Sequence, MOT19CVPR_Sequence, MOT17LOWFPS_Sequence,MOTS17_Sequence
 
 
 class MOT17_Wrapper(Dataset):
@@ -54,7 +54,7 @@ class MOT17_Wrapper(Dataset):
 
 
 class MOTS17_Wrapper(MOT17_Wrapper):
-	"""A Wrapper for the MOT_Sequence class to return multiple sequences."""
+	"""A Wrapper for the MOTS_Sequence class to return multiple sequences."""
 
 	def __init__(self, split, dataloader):
 		"""Initliazes all subset of the dataset.
@@ -64,29 +64,31 @@ class MOTS17_Wrapper(MOT17_Wrapper):
 		dataloader -- args for the MOT_Sequence dataloader
 		"""
 
-		train_det_4_mask_sequences = ['MOT17-%02d'%idx for idx in [2,5,9,11]]#mots challenge provided the mask anno data.
-		train_mask_sequences =  ["%04d"%idx for idx in [2,5,9,11]]
+		train_det_for_mask_sequences = ['MOT17-%02d'%idx for idx in [2,5,9,11]]#mots challenge provided the mask anno data.
+		train_mask_sequences =  ["%04d"%idx for idx in [2,5,9,11]]   #这是为了训练
+		train_sequences = ['MOT17-02', 'MOT17-04', 'MOT17-05', 'MOT17-09', 'MOT17-10', 'MOT17-11', 'MOT17-13']#这是为了测试　训练集
 		test_sequences = ['MOT17-01', 'MOT17-03', 'MOT17-06', 'MOT17-07', 'MOT17-08', 'MOT17-12', 'MOT17-14']
 
-		if "train" == split:
-			sequences = train_det_4_mask_sequences
-			mask_sequences = train_mask_sequences
+		if "train_mask" == split:
+			sequences = train_det_for_mask_sequences
+			# mask_sequences = train_mask_sequences
+		elif "train"==split:
+			sequences = train_sequences
 		elif "test" == split:
 			sequences = test_sequences
 		elif "all" == split:
-			sequences = train_det_4_mask_sequences + test_sequences
-			mask_sequences = train_mask_sequences
-		elif f"MOT17-{split}" in test_sequences:# only one
+			sequences = train_sequences + test_sequences
+		elif f"MOT17-{split}" in test_sequences:#单独测试一个
 			sequences = [f"MOT17-{split}"]
-			mask_sequences = ["%04d"%split]
+			# mask_sequences = ["%04d"%split]
 		else:
 			raise NotImplementedError("MOT19CVPR split not available.")
 
 		self._data = []
 		for s in sequences:
-			self._data.append(MOTS_Sequence(seq_name=s, **dataloader))
-		for s in mask_sequences:
-			self._data.append(MOTS_Sequence(seq_name=s, **dataloader))
+			self._data.append(MOTS17_Sequence(seq_name=s, **dataloader))
+		# for s in mask_sequences:
+		# 	self._data.append(MOTS17_Sequence(seq_name=s, **dataloader))
 	def __len__(self):
 		return len(self._data)
 
